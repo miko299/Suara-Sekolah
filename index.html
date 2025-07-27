@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Suara Sekolah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <style>
+    body {
+      background-image: url('rm222batch3-mind-03.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .overlay {
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(2px);
+    }
+    .error-input {
+      border-color: red;
+      outline: none;
+    }
+    .logo {
+      height: 40px;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overlay">
+
+  <!-- HEADER -->
+  <header class="bg-red-700 text-white py-4 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <h1 class="text-xl md:text-2xl font-bold">Suara Sekolah</h1>
+      </div>
+    </div>
+  </header>
+
+  <!-- TAGLINE -->
+  <section class="text-center mt-8 px-4">
+    <h2 class="text-lg md:text-xl font-semibold">Sistem Umum Aspirasi dan Respons Aduan Sekolah</h2>
+    <p class="text-sm md:text-base text-gray-700 mt-1">Khusus lingkungan sekolah - Laporkan masalah atau sampaikan aspirasi dengan mudah dan cepat.</p>
+  </section>
+
+  <!-- FORMULIR -->
+  <main class="flex-grow flex justify-center items-center px-4 py-10">
+    <form id="formAduan" class="space-y-4 bg-white p-6 rounded-xl shadow-md w-full max-w-2xl">
+      <div>
+        <label for="jenis" class="block text-sm font-medium text-gray-700">Jenis Laporan</label>
+        <select name="jenis" id="jenis" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm">
+          <option value="Aduan">Aduan</option>
+          <option value="Aspirasi">Aspirasi</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="kategori" class="block text-sm font-medium text-gray-700">Kategori</label>
+        <input type="text" name="kategori" id="kategori" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+      </div>
+
+      <div>
+        <label for="lokasi" class="block text-sm font-medium text-gray-700">Lokasi Kejadian</label>
+        <input type="text" name="lokasi" id="lokasi" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+      </div>
+
+      <div>
+        <label for="isi" class="block text-sm font-medium text-gray-700">Isi Laporan</label>
+        <textarea name="isi" id="isi" rows="4" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required></textarea>
+      </div>
+
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email Aktif</label>
+        <input type="email" name="email" id="email" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm" required>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700">Kirim Laporan</button>
+      </div>
+    </form>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="text-center text-gray-600 text-sm py-4">
+    <p>&copy; 2025 Suara Sekolah. Semua hak dilindungi.</p>
+  </footer>
+
+  <!-- SCRIPT -->
+  <script>
+    emailjs.init("BuixYTkcw2N4aVg3L");
+
+    const scriptURL = "https://script.google.com/macros/s/AKfycby2_4Olo3dm15J-55i5Gg7MzQEbcBn3RASWTNpIMWb2pbt9IO2UsPtviwSsryE4LTt1/exec";
+    const form = document.getElementById("formAduan");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Reset error input
+      const inputs = form.querySelectorAll("input, textarea, select");
+      inputs.forEach(input => input.classList.remove("error-input"));
+
+      let valid = true;
+      inputs.forEach(input => {
+        if (!input.value) {
+          input.classList.add("error-input");
+          valid = false;
+        }
+      });
+
+      if (!valid) {
+        alert("Mohon lengkapi semua kolom terlebih dahulu.");
+        return;
+      }
+
+      if (!confirm("Apakah Anda yakin ingin mengirim laporan ini?")) return;
+
+      const btn = form.querySelector("button[type='submit']");
+      btn.disabled = true;
+      btn.textContent = "Mengirim...";
+
+      const data = {
+        jenis: form.jenis.value,
+        kategori: form.kategori.value,
+        tanggal: new Date().toLocaleString("id-ID"),
+        lokasi: form.lokasi.value,
+        isi: form.isi.value,
+        email: form.email.value,
+      };
+
+      // Kirim ke Google Sheets
+      const formData = new FormData();
+      for (const key in data) {
+        formData.append(key, data[key]);
+      }
+
+      fetch(scriptURL, {
+        method: "POST",
+        body: formData,
+      })
+      .then(() => {
+        return emailjs.send("service_v6kbgs9", "template_044vm3k", {
+          to_email: data.email,
+          status: "Menunggu Verifikasi",
+          jenis: data.jenis,
+        });
+      })
+      .then(() => {
+        alert("Laporan berhasil dikirim dan email telah dikirim.");
+        form.reset();
+      })
+      .catch(() => {
+        alert("Terjadi kesalahan. Pastikan koneksi stabil.");
+      })
+      .finally(() => {
+        btn.disabled = false;
+        btn.textContent = "Kirim Laporan";
+      });
+    });
+  </script>
+</body>
+</html>

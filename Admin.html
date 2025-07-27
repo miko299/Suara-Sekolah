@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin - Suara Sekolah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6 min-h-screen">
+
+  <div class="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-md">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-red-600">Admin - Suara Sekolah</h1>
+      <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="flex flex-wrap gap-4 mb-4">
+      <select id="filterJenis" class="border border-gray-300 rounded px-3 py-1">
+        <option value="">Semua Jenis</option>
+        <option value="Aduan">Aduan</option>
+        <option value="Aspirasi">Aspirasi</option>
+      </select>
+      <select id="filterStatus" class="border border-gray-300 rounded px-3 py-1">
+        <option value="">Semua Status</option>
+        <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+        <option value="Diverifikasi">Diverifikasi</option>
+        <option value="Ditolak">Ditolak</option>
+      </select>
+      <input type="text" id="searchInput" placeholder="Cari..." class="border border-gray-300 rounded px-3 py-1 flex-grow" />
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full border border-gray-300 text-sm text-left">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="px-4 py-2">No</th>
+            <th class="px-4 py-2">Jenis</th>
+            <th class="px-4 py-2">Kategori</th>
+            <th class="px-4 py-2">Tanggal</th>
+            <th class="px-4 py-2">Lokasi</th>
+            <th class="px-4 py-2">Isi</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2">Email</th>
+            <th class="px-4 py-2">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tabelLaporan"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    emailjs.init("BuixYTkcw2N4aVg3L");
+
+    const sheetAPI = "https://opensheet.elk.sh/YOUR_SHEET_ID/Sheet1"; // ganti dengan sheet ID milikmu
+    const updateAPI = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec"; // ganti dengan Apps Script milikmu
+
+    // Pengecekan login admin (gunakan localStorage)
+    if (localStorage.getItem("adminLoggedIn") !== "true") {
+      alert("Anda harus login sebagai admin terlebih dahulu.");
+      window.location.href = "login.html";
+    }
+
+    let allData = [];
+
+    fetch(sheetAPI)
+      .then(res => res.json())
+      .then(data => {
+        allData = data;
+        renderTable(data);
+      });
+
+    function renderTable(data) {
+      const tbody = document.getElementById("tabelLaporan");
+      tbody.innerHTML = "";
+      data.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        tr.classList.add("border-b");
+        tr.innerHTML = `
+          <td class="px-4 py-2">${index + 1}</td>
+          <td class="px-4 py-2">${item.jenis}</td>
+          <td class="px-4 py-2">${item.kategori}</td>
+          <td class="px-4 py-2">${item.tanggal}</td>
+          <td class="px-4 py-2">${item.lokasi}</td>
+          <td class="px-4 py-2">${item.isi}</td>
+          <td class="px-4 py-2 font-semibold">${item.status}</td>
+          <td class="px-4 py-2">${item.email}</td>
+          <td class="px-4 py-2">
+            <button onclick="ubahStatus(${index + 2}, 'Diverifikasi', '${item.email}', '${item.jenis}')" class="text-green-600 hover:underline">✔</button>
+            <button onclick="ubahStatus(${index + 2}, 'Ditolak', '${item.email}', '${item.jenis}')" class="text-red-600 hover:underline ml-2">✘</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("filterJenis").addEventListener("change", filterTable);
+    document.getElementById("filterStatus").addEventListener("change", filterTable);
+    document.getElementById("searchInput").addEventListener("input", filterTable);
+
+    function filterTable() {
+      const jenis = document.getElementById("filterJenis").value.toLowerCase();
+      const status = document.getElementById("filterStatus").value.toLowerCase();
+      const keyword = document.getElementById("searchInput").value.toLowerCase();
+
+      const filtered = allData.filter(item => {
+        const cocokJenis = !jenis || item.jenis.toLowerCase() === jenis;
+        const cocokStatus = !status || item.status.toLowerCase() === status;
+        const cocokKeyword = !keyword ||
+          item.kategori.toLowerCase().includes(keyword) ||
+          item.lokasi.toLowerCase().includes(keyword) ||
+          item.isi.toLowerCase().includes(keyword) ||
+          item.email.toLowerCase().includes(keyword);
+        return cocokJenis && cocokStatus && cocokKeyword;
+      });
+
+      renderTable(filtered);
+    }
+
+    function ubahStatus(baris, statusBaru, emailTujuan, jenis) {
+      fetch(updateAPI, {
+        method: "POST",
+        body: JSON.stringify({ row: baris, status: statusBaru })
+      })
+      .then(res => res.json())
+      .then(async () => {
+        await emailjs.send("service_v6kbgs9", "template_044vm3k", {
+          to_email: emailTujuan,
+          status: statusBaru,
+          jenis: jenis
+        });
+        alert("Status diperbarui dan email telah dikirim.");
+        location.reload();
+      })
+      .catch(() => {
+        alert("Gagal memperbarui status.");
+      });
+    }
+
+    function logout() {
+      localStorage.removeItem("adminLoggedIn");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
