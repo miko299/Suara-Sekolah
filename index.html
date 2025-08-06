@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Suara Sekolah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    UPLOADCARE_PUBLIC_KEY = '7191033a442da3a8a814';
+  </script>
+  <script src="https://ucarecdn.com/libs/widget/3.x/uploadcare.full.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suara Sekolah</title>
+  <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/css/fontawesome.css">
+  <link rel="stylesheet" href="assets/css/templatemo-tale-seo-agency.css">
+  <link rel="stylesheet" href="assets/css/animated.css">
+  <link rel="stylesheet" href="assets/css/owl.css">
+</head>
+<body>
+<body class="bg-gray-100 min-h-screen flex flex-col justify-between">
+
+  <!-- HEADER -->
+    <header style="background-color: #c82333; padding: 15px 30px;">
+  <h1 style="color: white; margin: 0; font-size: 1.5 rem;">Suara Sekolah</h1>
+</header>
+
+  <!-- TAGLINE -->
+  <section class="text-center mt-8 px-4">
+    <h2 class="text-lg md:text-xl font-semibold">Sistem Umum Aspirasi dan Respons Aduan Sekolah</h2>
+    <p class="text-sm md:text-base text-gray-700 mt-1">Khusus lingkungan sekolah - Laporkan masalah atau sampaikan aspirasi dengan mudah dan cepat.</p>
+  </section>
+
+  <!-- FORMULIR -->
+  <section id="form-lapor" class="py-12">
+    <div class="max-w-xl mx-auto bg-white rounded-xl shadow-2xl p-8">
+      <h2 class="text-xl font-bold text-center text-red-700 mb-6">Laporkan Aspirasi atau Pengaduan Anda</h2>
+      <div class="flex justify-center mb-6 gap-4">
+        <button type="button" class="jenis-btn px-6 py-2 border rounded-full text-sm font-semibold text-white bg-red-600 border-red-600 transition" data-target="aduan">Aduan</button>
+        <button type="button" class="jenis-btn px-6 py-2 border rounded-full text-sm font-semibold text-red-600 border-red-600 hover:bg-red-600 hover:text-white transition" data-target="aspirasi">Aspirasi</button>
+      </div>
+
+       <!-- Form Aduan -->
+      <form id="formAduan" class="space-y-4">
+        <input type="hidden" name="jenis" value="Aduan">
+        <input type="text" name="judul" placeholder="Ketik judul laporan Anda*" required class="w-full px-5 py-2 text-sm border border-gray-400 rounded">
+        <textarea name="isi" rows="4" placeholder="Tulis isi laporan Anda*" required class="w-full px-5 py-2 text-sm border border-gray-400 rounded"></textarea>
+        <input type="date" name="tanggal" required class="w-full px-5 py-2 text-sm border border-gray-400 rounded">
+        <input type="text" name="lokasi" placeholder="Tulis lokasi kejadian*" required class="w-full px-5 py-2 text-sm border border-gray-400 rounded">
+        <select name="kategori" required class="w-full px-5 py-2 text-sm border border-gray-400 rounded bg-white text-gray-700">
+          <option value="" disabled selected>Pilih kategori laporan*</option>
+          <option value="Fasilitas">Fasilitas</option>
+          <option value="Pelayanan">Pelayanan</option>
+          <option value="Guru">Guru</option>
+          <option value="Keamanan">Keamanan</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+        <input
+          type="hidden"
+          role="uploadcare-uploader"
+          name="lampiran"
+          data-clearable
+          data-multiple="false"
+          data-images-only="false"
+          data-tabs="file url"
+          data-lang="id"
+        />
+        <button type="submit" class="w-full py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700">Kirim Aduan</button>
+      </form>
+
+      <!-- Form Aspirasi -->
+      <form id="formAspirasi" class="space-y-4 hidden">
+        <input type="hidden" name="jenis" value="Aspirasi">
+        <input type="text" name="judul" placeholder="Ketik judul aspirasi Anda*" required class="w-full px-5 py-2 text-sm border border-gray-400 rounded">
+        <textarea name="isi" rows="4" placeholder="Tulis aspirasi Anda*" required class="w-full px-5 py-2 text-sm border border-gray-400 rounded"></textarea>
+        <select name="kategori" required class="w-full px-5 py-2 text-sm border border-gray-400 rounded bg-white text-gray-700">
+          <option value="" disabled selected>Pilih kategori aspirasi*</option>
+          <option value="Fasilitas">Fasilitas</option>
+          <option value="Pelayanan">Pelayanan</option>
+          <option value="Guru">Guru</option>
+          <option value="Kegiatan">Kegiatan</option>
+          <option value="Lainnya">Lainnya</option>
+        </select>
+        <input
+          type="hidden"
+          role="uploadcare-uploader"
+          name="lampiran"
+          data-clearable
+          data-multiple="false"
+          data-images-only="false"
+          data-tabs="file url"
+          data-lang="id"
+        />
+        <button type="submit" class="w-full py-2 bg-red-600 text-white font-semibold rounded hover:bg-red-700">Kirim Aspirasi</button>
+      </form>
+    </div>
+  </section>
+  <section class="max-w-5xl mx-auto mt-10 px-4">
+    <h2 class="text-xl font-bold text-center mb-8">Alur Penanganan Laporan</h2>
+
+    <div class="flex justify-between items-center relative">
+      <!-- Garis horizontal -->
+      <div class="absolute left-0 right-0 top-5 h-1 bg-gray-300 z-0"></div>
+
+      <!-- Tahap 1 -->
+      <div class="relative z-10 flex flex-col items-center text-center w-1/4">
+        <div class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 font-bold shadow">1</div>
+        <p class="mt-3 text-sm font-medium text-gray-600">Laporan Dikirim</p>
+      </div>
+
+      <!-- Tahap 2 -->
+      <div class="relative z-10 flex flex-col items-center text-center w-1/4">
+        <div class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 font-bold shadow">2</div>
+        <p class="mt-3 text-sm font-medium text-gray-600">Verifikasi</p>
+      </div>
+
+      <!-- Tahap 3 -->
+      <div class="relative z-10 flex flex-col items-center text-center w-1/4">
+        <div class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 font-bold shadow">3</div>
+        <p class="mt-3 text-sm font-medium text-gray-600">Tindak Lanjut</p>
+      </div>
+
+      <!-- Tahap 4 -->
+      <div class="relative z-10 flex flex-col items-center text-center w-1/4">
+        <div class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 text-gray-600 font-bold shadow">4</div>
+        <p class="mt-3 text-sm font-medium text-gray-600">Selesai</p>
+      </div>
+    </div>
+
+    <p class="mt-6 text-center text-sm text-gray-500 max-w-2xl mx-auto">
+      Setelah laporan Anda dikirim, tim kami akan melakukan verifikasi sebelum menindaklanjuti laporan ke pihak terkait.
+    </p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="text-center text-gray-600 text-sm py-4">
+    <p>&copy; 2025 Suara Sekolah. Semua hak dilindungi.</p>
+  </footer>
+
+  <!-- SCRIPT -->
+ <script>
+    emailjs.init("BuixYTkcw2N4aVg3L");
+
+    const jenisButtons = document.querySelectorAll('.jenis-btn');
+    const formAduan = document.getElementById('formAduan');
+    const formAspirasi = document.getElementById('formAspirasi');
+
+    jenisButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        jenisButtons.forEach(b => b.classList.remove('bg-red-600', 'text-white'));
+        btn.classList.add('bg-red-600', 'text-white');
+
+        if (btn.dataset.target === 'aduan') {
+          formAduan.classList.remove('hidden');
+          formAspirasi.classList.add('hidden');
+        } else {
+          formAspirasi.classList.remove('hidden');
+          formAduan.classList.add('hidden');
+        }
+      });
+    });
+
+        emailjs.init("BuixYTkcw2N4aVg3L");
+
+        document.querySelectorAll('form').forEach(form => {
+          form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const button = form.querySelector("button[type='submit']");
+            button.disabled = true;
+            button.textContent = "Mengirim...";
+
+            // Tambahkan delay kecil agar input lampiran terisi
+            setTimeout(() => {
+              const formData = new FormData(form);
+              const data = {};
+              formData.forEach((value, key) => {
+                data[key] = value;
+              });
+
+              data.to_email = "luqman.hakym06@gmail.com"; // email tujuan
+
+              if (!formData.get("lampiran")) {
+                const lampiranInput = form.querySelector("input[name='lampiran']");
+                if (lampiranInput && lampiranInput.value) {
+                  formData.append("lampiran", lampiranInput.value);
+                }
+              }
+
+              // Kirim ke Google Sheets dulu
+              fetch("https://script.google.com/macros/s/AKfycby2_4Olo3dm15J-55i5Gg7MzQEbcBn3RASWTNpIMWb2pbt9IO2UsPtviwSsryE4LTt1/exec", {
+                method: "POST",
+                body: formData
+              })
+              .then(response => {
+                if (!response.ok) throw new Error("Gagal kirim ke Google Sheets");
+                return emailjs.send("service_v6kbgs9", "template_044vm3k", data);
+              })
+              .then(() => {
+                alert("Laporan berhasil dikirim. Terima kasih!");
+                form.reset();
+                const widget = form.querySelector("input[name='lampiran']").uploadcareWidget;
+                if (widget) widget.value(null);
+              })
+              .catch(() => {
+                alert("Terjadi kesalahan dalam mengirim laporan.");
+              })
+              .finally(() => {
+                button.disabled = false;
+                button.textContent = "Kirim";
+              });
+            }, 100); // delay 100ms untuk menunggu uploadcare isi input lampiran
+          });
+        });
+</script>
+</body>
+</html>

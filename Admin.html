@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin - Suara Sekolah</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6 min-h-screen">
+
+  <div class="max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-md">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold text-red-600">Admin - Suara Sekolah</h1>
+      <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+    </div>
+
+    <div class="flex flex-wrap gap-4 mb-4">
+      <select id="filterSelect" class="border rounded px-2 py-1">
+      <option value="Semua">Semua</option>
+      <option value="Aduan">Aduan</option>
+      <option value="Aspirasi">Aspirasi</option>
+      </select>
+      <input type="text" id="searchInput" placeholder="Cari..." class="border border-gray-300 rounded px-3 py-1 flex-grow" />
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full border border-gray-300 text-sm text-left">
+        <thead class="bg-gray-200">
+          <tr>
+            <th class="px-4 py-2">No</th>
+            <th class="px-4 py-2">Klasifikasi</th>
+            <th class="px-4 py-2">Kategori</th>
+            <th class="px-4 py-2">Tanggal</th>
+            <th class="px-4 py-2">Lokasi</th>
+            <th class="px-4 py-2">Isi</th>
+            <th class="px-4 py-2">Lampiran</th>
+            <th class="px-4 py-2">Email</th>
+          </tr>
+        </thead>
+        <tbody id="tabelLaporan"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script>
+    emailjs.init("BuixYTkcw2N4aVg3L");
+
+    const sheetAPI = "https://opensheet.elk.sh/1XGpBFFDHR4VL06RV5E6Rmin59okZLdq8m5BgEAoJsFw/Sheet1";
+
+    if (sessionStorage.getItem("adminLoggedIn") === "true") {
+      alert("Anda harus login sebagai admin terlebih dahulu.");
+      window.location.href = "login.html";
+    }
+
+  let semuaData = [];
+  let filterJenis = "Semua";
+
+    fetch(sheetAPI)
+      .then(res => res.json())
+      .then(data => {
+        semuaData = data;
+        renderTable(semuaData);
+      });
+
+    function renderTable(data) {
+    const tbody = document.getElementById("tabelLaporan");
+    tbody.innerHTML = "";
+
+    const filteredData = filterJenis === "Semua" 
+      ? data 
+      : data.filter(item => item["Klasifikasi"] === filterJenis);
+
+    filteredData.forEach((item, index) => {
+      const tr = document.createElement("tr");
+      tr.classList.add("border-b");
+      tr.innerHTML = `
+          <td class="px-4 py-2">${index + 1}</td>
+          <td class="px-4 py-2">${item["Klasifikasi"]}</td>
+          <td class="px-4 py-2">${item.Kategori}</td>
+          <td class="px-4 py-2">${item.Tanggal}</td>
+          <td class="px-4 py-2">${item.Lokasi}</td>
+          <td class="px-4 py-2">${item.Isi}</td>
+          <td class="px-4 py-2">${item.Lampiran}</td>
+          <td class="px-4 py-2">${item.Email || "-"}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    document.getElementById("searchInput").addEventListener("input", function () {
+    const keyword = this.value.toLowerCase();
+
+    const filtered = semuaData.filter(item => {
+      return (
+        (item["Klasifikasi"] || "").toLowerCase().includes(keyword) ||
+        (item["Kategori"] || "").toLowerCase().includes(keyword) ||
+        (item["Tanggal"] || "").toLowerCase().includes(keyword) ||
+        (item["Lokasi"] || "").toLowerCase().includes(keyword) ||
+        (item["Isi"] || "").toLowerCase().includes(keyword)
+      );
+    });
+
+    renderTable(filtered);
+  });
+
+     document.getElementById("filterSelect").addEventListener("change", function () {
+        filterJenis = this.value;
+        renderTable(semuaData);
+      });
+
+      const email = laporan.Email || "";
+
+    function ubahStatus(baris, statusBaru, emailTujuan, jenis) {
+      fetch(updateAPI, {
+        method: "POST",
+        body: JSON.stringify({ row: baris, status: statusBaru })
+      })
+      .then(res => res.json())
+      .then(async () => {
+        await emailjs.send("service_v6kbgs9", "template_4obbera", {
+          to_email: emailTujuan,
+          status: statusBaru,
+          jenis: jenis
+        });
+        alert("Status diperbarui dan email telah dikirim.");
+        location.reload();
+      })
+      .catch(() => {
+        alert("Gagal memperbarui status.");
+      });
+    }
+
+    function logout() {
+      sessionStorage.removeItem("adminLoggedIn");
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
